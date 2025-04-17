@@ -1,0 +1,15 @@
+{
+  "name": "sound-pin",
+  "version": "1.0.0",
+  "description": "Pinterest but for sound",
+  "main": "script.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.12"
+  }
+}

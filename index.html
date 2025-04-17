@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundPin</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="input-section">
+            <h2>Create Pin</h2>
+            <input type="text" id="youtube-url" placeholder="Paste YouTube URL">
+            <div id="youtube-player"></div>
+            <div class="timestamp-controls">
+                <div class="timestamp-input">
+                    <label>Start</label>
+                    <input type="text" id="start-time" placeholder="0:00">
+                </div>
+                <div class="timestamp-input">
+                    <label>End</label>
+                    <input type="text" id="end-time" placeholder="0:00">
+                </div>
+            </div>
+            <textarea id="pin-note" placeholder="Add a note..."></textarea>
+            <button id="save-pin">Save</button>
+        </div>
+
+        <div class="pin-board">
+            <h2>Sound Pins</h2>
+            <div id="pins-container" class="pins-grid">
+                <!-- Pins will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the YouTube IFrame API -->
+    <script>
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        document.getElementsByTagName('script')[0].parentNode.insertBefore(tag, document.getElementsByTagName('script')[0]);
+    </script>
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>
