@@ -163,7 +163,8 @@ const displayPins = () => {
             <img class="pin-thumbnail" src="${thumbnail}" alt="${title}">
             <div class="pin-content">
                 <div class="pin-title">${title}</div>
-                <p class="pin-note">${note}</p>
+                <div class="pin-source">${type === 'youtube' ? 'YouTube' : 'SoundCloud'}</div>
+                ${note ? `<p class="pin-note">${note}</p>` : ''}
                 <span class="pin-timestamp">${formatTime(startTime)} - ${formatTime(endTime)}</span>
                 <button class="play-button" onclick="playPin('${mediaId}', '${type}', ${startTime}, ${endTime})">Play</button>
             </div>
