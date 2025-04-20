@@ -228,9 +228,16 @@ document.getElementById('save-pin').addEventListener('click', () => {
         return;
     }
 
-    const startTime = parseTimestamp(document.getElementById('start-time').value);
-    const endTime = parseTimestamp(document.getElementById('end-time').value);
-    const note = document.getElementById('pin-note').value;
+    const startTimeInput = document.getElementById('start-time').value;
+    const endTimeInput = document.getElementById('end-time').value;
+
+    if (!startTimeInput || !endTimeInput) {
+        alert('Please enter both start and end times');
+        return;
+    }
+
+    const startTime = parseTimestamp(startTimeInput);
+    const endTime = parseTimestamp(endTimeInput);
 
     if (isNaN(startTime) || isNaN(endTime)) {
         alert('Please enter valid timestamps (e.g., 1:30)');
@@ -242,12 +249,27 @@ document.getElementById('save-pin').addEventListener('click', () => {
         return;
     }
 
+    const validateAndSave = (duration) => {
+        if (endTime > duration) {
+            alert(`End time cannot be greater than the media duration (${formatTime(duration)})`);
+            return;
+        }
+
+        if (currentVideoId) {
+            const { title, thumbnail } = player.videoDetails;
+            savePin(currentVideoId, 'youtube', title, thumbnail, startTime, endTime, note);
+        } else {
+            const { title, thumbnail } = soundcloudPlayer.videoDetails;
+            savePin(currentSoundCloudUrl, 'soundcloud', title, thumbnail, startTime, endTime, note);
+        }
+    };
+
+    const note = document.getElementById('pin-note').value;
+
     if (currentVideoId) {
-        const { title, thumbnail } = player.videoDetails;
-        savePin(currentVideoId, 'youtube', title, thumbnail, startTime, endTime, note);
+        validateAndSave(player.getDuration());
     } else {
-        const { title, thumbnail } = soundcloudPlayer.videoDetails;
-        savePin(currentSoundCloudUrl, 'soundcloud', title, thumbnail, startTime, endTime, note);
+        soundcloudPlayer.getDuration(duration => validateAndSave(duration / 1000)); // Convert ms to seconds
     }
 });
 
