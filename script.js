@@ -1,7 +1,10 @@
 let player;
+let soundcloudPlayer;
 let currentVideoId = null;
+let currentSoundCloudUrl = null;
 let isPlayerReady = false;
-let pendingVideoUrl = null;
+let isSoundCloudReady = false;
+let pendingUrl = null;
 
 window.onYouTubeIframeAPIReady = () => {
     player = new YT.Player('youtube-player', {
@@ -13,15 +16,28 @@ window.onYouTubeIframeAPIReady = () => {
     });
 };
 
+const initSoundCloudPlayer = () => {
+    const iframe = document.getElementById('soundcloud-player');
+    soundcloudPlayer = SC.Widget(iframe);
+    soundcloudPlayer.bind(SC.Widget.Events.READY, () => {
+        isSoundCloudReady = true;
+        if (pendingUrl?.includes('soundcloud.com')) {
+            handleUrl(pendingUrl);
+        }
+    });
+};
+
+// Initialize SoundCloud player
+initSoundCloudPlayer();
+
 const onPlayerReady = () => {
     isPlayerReady = true;
-    if (pendingVideoUrl) {
-        handleVideoUrl(pendingVideoUrl);
-        pendingVideoUrl = null;
+    if (pendingUrl?.includes('youtube')) {
+        handleUrl(pendingUrl);
     }
 };
 
-const onPlayerError = () => alert('Error loading video. Please check the URL and try again.');
+const onPlayerError = () => alert('Error loading media. Please check the URL and try again.');
 
 const onPlayerStateChange = event => {
     if (event.data === YT.PlayerState.PLAYING) updateVideoDetails();
@@ -35,10 +51,25 @@ const updateVideoDetails = () => {
     };
 };
 
+const getUrlType = url => {
+    if (url.includes('youtube')) return 'youtube';
+    if (url.includes('soundcloud.com')) return 'soundcloud';
+    return null;
+};
+
 const getVideoId = url => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? match[2] : null;
+};
+
+const getSoundCloudTimestamp = url => {
+    const timestampMatch = url.match(/#t=(\d{1,2}:)?(\d{1,2}:\d{2})/);
+    if (!timestampMatch) return 0;
+
+    const timestamp = timestampMatch[2];
+    const [minutes, seconds] = timestamp.split(':').map(Number);
+    return minutes * 60 + seconds;
 };
 
 const formatTime = seconds => {
@@ -52,29 +83,71 @@ const parseTimestamp = timestamp => {
     return mins * 60 + secs;
 };
 
-const handleVideoUrl = url => {
-    const videoId = getVideoId(url);
-    if (!videoId) {
-        alert('Invalid YouTube URL');
-        return;
-    }
+const handleUrl = url => {
+    if (url.includes('youtube')) {
+        const videoId = getVideoId(url);
+        if (!videoId) {
+            alert('Invalid YouTube URL');
+            return;
+        }
 
-    if (!isPlayerReady) {
-        pendingVideoUrl = url;
-        return;
-    }
+        if (!isPlayerReady) {
+            pendingUrl = url;
+            return;
+        }
 
-    try {
-        currentVideoId = videoId;
-        player.loadVideoById(videoId);
-    } catch {
-        alert('Error loading video. Please check the URL and try again.');
+        try {
+            document.getElementById('youtube-player').style.display = 'block';
+            document.getElementById('soundcloud-player').style.display = 'none';
+            currentVideoId = videoId;
+            currentSoundCloudUrl = null;
+            player.loadVideoById(videoId);
+        } catch {
+            alert('Error loading video. Please check the URL and try again.');
+        }
+    } else if (url.includes('soundcloud.com')) {
+        if (!isSoundCloudReady) {
+            pendingUrl = url;
+            return;
+        }
+
+        try {
+            document.getElementById('youtube-player').style.display = 'none';
+            document.getElementById('soundcloud-player').style.display = 'block';
+            currentVideoId = null;
+            currentSoundCloudUrl = url;
+
+            soundcloudPlayer.load(url, {
+                callback: () => {
+                    // Get track info for display
+                    soundcloudPlayer.getCurrentSound(sound => {
+                        soundcloudPlayer.videoDetails = {
+                            title: sound.title,
+                            thumbnail: sound.artwork_url || sound.user.avatar_url
+                        };
+                    });
+                }
+            });
+        } catch {
+            alert('Error loading SoundCloud track. Please check the URL and try again.');
+        }
+    } else {
+        alert('Invalid URL. Please use a YouTube, YouTube Music, or SoundCloud URL');
     }
 };
 
-const savePin = (videoId, title, thumbnail, startTime, endTime, note) => {
+const savePin = (id, type, title, thumbnail, startTime, endTime, note) => {
     const pins = JSON.parse(localStorage.getItem('soundPins') || '[]');
-    pins.push({ id: Date.now(), videoId, title, thumbnail, startTime, endTime, note });
+    pins.push({
+        id: Date.now(),
+        mediaId: id,
+        type,
+        title,
+        thumbnail,
+        startTime,
+        endTime,
+        note
+    });
     localStorage.setItem('soundPins', JSON.stringify(pins));
     displayPins();
 };
@@ -83,46 +156,75 @@ const displayPins = () => {
     const pinsContainer = document.getElementById('pins-container');
     const pins = JSON.parse(localStorage.getItem('soundPins') || '[]');
 
-    pinsContainer.innerHTML = pins.map(({ videoId, title, thumbnail, startTime, endTime, note }) => `
+    pinsContainer.innerHTML = pins.map(({ mediaId, type, title, thumbnail, startTime, endTime, note }) => `
         <div class="pin-card">
             <img class="pin-thumbnail" src="${thumbnail}" alt="${title}">
             <div class="pin-content">
                 <div class="pin-title">${title}</div>
                 <p class="pin-note">${note}</p>
                 <span class="pin-timestamp">${formatTime(startTime)} - ${formatTime(endTime)}</span>
-                <button class="play-button" onclick="playPin('${videoId}', ${startTime}, ${endTime})">Play</button>
+                <button class="play-button" onclick="playPin('${mediaId}', '${type}', ${startTime}, ${endTime})">Play</button>
             </div>
         </div>
     `).join('');
 };
 
-window.playPin = (videoId, startTime, endTime) => {
-    if (!isPlayerReady) {
-        alert('Player not ready. Please try again.');
-        return;
-    }
-
-    if (currentVideoId !== videoId) {
-        player.loadVideoById(videoId, startTime);
-        currentVideoId = videoId;
-    } else {
-        player.seekTo(startTime);
-        player.playVideo();
-    }
-
-    const checkTime = setInterval(() => {
-        if (player.getCurrentTime() >= endTime) {
-            player.pauseVideo();
-            clearInterval(checkTime);
+window.playPin = (mediaId, type, startTime, endTime) => {
+    if (type === 'youtube') {
+        if (!isPlayerReady) {
+            alert('YouTube player not ready. Please try again.');
+            return;
         }
-    }, 100);
+
+        document.getElementById('youtube-player').style.display = 'block';
+        document.getElementById('soundcloud-player').style.display = 'none';
+
+        if (currentVideoId !== mediaId) {
+            player.loadVideoById(mediaId, startTime);
+            currentVideoId = mediaId;
+        } else {
+            player.seekTo(startTime);
+            player.playVideo();
+        }
+
+        const checkTime = setInterval(() => {
+            if (player.getCurrentTime() >= endTime) {
+                player.pauseVideo();
+                clearInterval(checkTime);
+            }
+        }, 100);
+    } else {
+        if (!isSoundCloudReady) {
+            alert('SoundCloud player not ready. Please try again.');
+            return;
+        }
+
+        document.getElementById('youtube-player').style.display = 'none';
+        document.getElementById('soundcloud-player').style.display = 'block';
+
+        soundcloudPlayer.load(mediaId, {
+            callback: () => {
+                soundcloudPlayer.seekTo(startTime * 1000);
+                soundcloudPlayer.play();
+
+                const checkTime = setInterval(() => {
+                    soundcloudPlayer.getPosition(position => {
+                        if (position >= endTime * 1000) {
+                            soundcloudPlayer.pause();
+                            clearInterval(checkTime);
+                        }
+                    });
+                }, 100);
+            }
+        });
+    }
 };
 
-document.getElementById('youtube-url').addEventListener('input', e => handleVideoUrl(e.target.value));
+document.getElementById('url-input').addEventListener('input', e => handleUrl(e.target.value));
 
 document.getElementById('save-pin').addEventListener('click', () => {
-    if (!currentVideoId || !player.videoDetails) {
-        alert('Please wait for the video to start playing before saving');
+    if (!currentVideoId && !currentSoundCloudUrl) {
+        alert('Please wait for the media to start playing before saving');
         return;
     }
 
@@ -140,8 +242,13 @@ document.getElementById('save-pin').addEventListener('click', () => {
         return;
     }
 
-    const { title, thumbnail } = player.videoDetails;
-    savePin(currentVideoId, title, thumbnail, startTime, endTime, note);
+    if (currentVideoId) {
+        const { title, thumbnail } = player.videoDetails;
+        savePin(currentVideoId, 'youtube', title, thumbnail, startTime, endTime, note);
+    } else {
+        const { title, thumbnail } = soundcloudPlayer.videoDetails;
+        savePin(currentSoundCloudUrl, 'soundcloud', title, thumbnail, startTime, endTime, note);
+    }
 });
 
 displayPins();

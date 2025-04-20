@@ -12,8 +12,13 @@
     <div class="container">
         <div class="input-section">
             <h2>Create Pin</h2>
-            <input type="text" id="youtube-url" placeholder="Paste YouTube or Youtube Music URL">
-            <div id="youtube-player"></div>
+            <input type="text" id="url-input" placeholder="Paste YouTube, YouTube Music, or SoundCloud URL">
+            <div id="player-container">
+                <div id="youtube-player"></div>
+                <iframe id="soundcloud-player" width="100%" height="360" frameborder="no" allow="autoplay"
+                    src="https://w.soundcloud.com/player/?url=https://api.soundcloud.com/tracks/293"
+                    style="display: none;"></iframe>
+            </div>
             <div class="timestamp-controls">
                 <div class="timestamp-input">
                     <label>Start</label>
@@ -36,12 +41,9 @@
         </div>
     </div>
 
-    <!-- Load the YouTube IFrame API -->
-    <script>
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        document.getElementsByTagName('script')[0].parentNode.insertBefore(tag, document.getElementsByTagName('script')[0]);
-    </script>
+    <!-- Load APIs -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="https://w.soundcloud.com/player/api.js"></script>
     <script type="module" src="script.js"></script>
 </body>
 
