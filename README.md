@@ -36,4 +36,4 @@ Referencr is Pinterest for sounds! It helps music producers save and organize sp
 
 ## Note
 
-This is a client-side only application. All pins are saved in your browser's local storage. Consider backing up your pins periodically if you need to preserve them long-term. 
+This is a client-side only application. All pins are saved in your browser's local storage.
