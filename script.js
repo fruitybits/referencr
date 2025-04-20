@@ -164,7 +164,7 @@ const displayPins = () => {
                 <div class="pin-source">${type === 'youtube' ? 'YouTube' : 'SoundCloud'}</div>
                 <span class="pin-timestamp">${formatTime(startTime)} - ${formatTime(endTime)}</span>
                 ${note ? `<p class="pin-note">${note}</p>` : ''}
-                <button class="play-button" onclick="playPin('${mediaId}', '${type}', ${startTime}, ${endTime})">Play</button>
+                <button class="play-button" onclick="playPin('${mediaId}', '${type}', ${startTime}, ${endTime})">Play Clip</button>
             </div>
         </div>
     `).join('');
@@ -175,6 +175,11 @@ window.playPin = (mediaId, type, startTime, endTime) => {
         if (!isPlayerReady) {
             alert('YouTube player not ready. Please try again.');
             return;
+        }
+
+        // Only pause SoundCloud if it's playing
+        if (soundcloudPlayer) {
+            soundcloudPlayer.pause();
         }
 
         document.getElementById('youtube-player').style.display = 'block';
@@ -198,6 +203,11 @@ window.playPin = (mediaId, type, startTime, endTime) => {
         if (!isSoundCloudReady) {
             alert('SoundCloud player not ready. Please try again.');
             return;
+        }
+
+        // Only pause YouTube if it's playing
+        if (player && player.getPlayerState() === YT.PlayerState.PLAYING) {
+            player.pauseVideo();
         }
 
         document.getElementById('youtube-player').style.display = 'none';
