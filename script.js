@@ -27,7 +27,6 @@ const initSoundCloudPlayer = () => {
     });
 };
 
-// Initialize SoundCloud player
 initSoundCloudPlayer();
 
 const onPlayerReady = () => {
@@ -119,7 +118,6 @@ const handleUrl = url => {
 
             soundcloudPlayer.load(url, {
                 callback: () => {
-                    // Get track info for display
                     soundcloudPlayer.getCurrentSound(sound => {
                         soundcloudPlayer.videoDetails = {
                             title: sound.title,
@@ -138,7 +136,7 @@ const handleUrl = url => {
 
 const savePin = (id, type, title, thumbnail, startTime, endTime, note, tag) => {
     const pins = JSON.parse(localStorage.getItem('soundPins') || '[]');
-    pins.push({
+    pins.unshift({
         id: Date.now(),
         mediaId: id,
         type,
@@ -164,8 +162,8 @@ const displayPins = () => {
             <div class="pin-content">
                 <div class="pin-title">${title}</div>
                 <div class="pin-source">${type === 'youtube' ? 'YouTube' : 'SoundCloud'}</div>
-                ${note ? `<p class="pin-note">${note}</p>` : ''}
                 <span class="pin-timestamp">${formatTime(startTime)} - ${formatTime(endTime)}</span>
+                ${note ? `<p class="pin-note">${note}</p>` : ''}
                 <button class="play-button" onclick="playPin('${mediaId}', '${type}', ${startTime}, ${endTime})">Play</button>
             </div>
         </div>
@@ -223,7 +221,11 @@ window.playPin = (mediaId, type, startTime, endTime) => {
     }
 };
 
-document.getElementById('url-input').addEventListener('input', e => handleUrl(e.target.value));
+document.getElementById('url-input').addEventListener('change', e => handleUrl(e.target.value));
+document.getElementById('url-input').addEventListener('paste', e => {
+    // Use timeout to prevent constant alerts
+    setTimeout(() => handleUrl(e.target.value), 0);
+});
 
 document.getElementById('save-pin').addEventListener('click', () => {
     if (!currentVideoId && !currentSoundCloudUrl) {

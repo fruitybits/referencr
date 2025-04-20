@@ -2,10 +2,10 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
-    font-family: -apple-system, system-ui, sans-serif;
     background: #f0f2f5;
     color: #333;
 }
@@ -14,14 +14,19 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 30px;
 }
 
 .input-section {
     background: #fff;
     padding: 20px;
-    border-radius: 16px;
+    border-radius: 24px;
     box-shadow: 0 1px 3px #0001;
-    margin-bottom: 30px;
+    position: sticky;
+    top: 20px;
+    height: fit-content;
 }
 
 h2 {
@@ -29,18 +34,29 @@ h2 {
     color: #211922;
 }
 
-#youtube-url,
+#url-input,
 .timestamp-input input,
-#pin-note {
+#pin-note,
+#pin-tag {
     width: 100%;
-    padding: 12px;
+    padding: 12px 16px;
     border: 2px solid #ddd;
-    border-radius: 8px;
+    border-radius: 16px;
     font-size: 16px;
+    background: #fff;
 }
 
-#youtube-url,
-#pin-note {
+#url-input:focus,
+.timestamp-input input:focus,
+#pin-note:focus,
+#pin-tag:focus {
+    outline: none;
+    border-color: #e60023;
+}
+
+#url-input,
+#pin-note,
+#pin-tag {
     margin-bottom: 20px;
 }
 
@@ -101,11 +117,24 @@ h2 {
     background: #ad081b;
 }
 
+.pin-board {
+    position: relative;
+}
+
+.pin-board h2 {
+    position: sticky;
+    top: 20px;
+    background: #e60023;
+    border-radius: 16px;
+    padding: 10px 10px 10px 20px;
+    z-index: 1;
+    color: #fff;
+}
+
 .pins-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
-    padding: 20px 0;
 }
 
 .pin-card {
@@ -116,6 +145,7 @@ h2 {
     transition: transform .2s;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .pin-card:hover {
@@ -132,7 +162,7 @@ h2 {
     padding: 16px;
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
+    height: 100%;
 }
 
 .pin-title {
@@ -146,6 +176,11 @@ h2 {
     font-size: 14px;
     color: #666;
     margin-bottom: 12px;
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 8px 0;
 }
 
 .pin-timestamp {
@@ -153,4 +188,53 @@ h2 {
     color: #666;
     display: block;
     margin-bottom: 8px;
+}
+
+.pin-tag {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.pin-tag[data-tag="drums"] {
+    background: #FF4136;
+}
+
+.pin-tag[data-tag="vocal"] {
+    background: #0074D9;
+}
+
+.pin-tag[data-tag="bass"] {
+    background: #B10DC9;
+}
+
+.pin-tag[data-tag="sound design"] {
+    background: #2ECC40;
+}
+
+.pin-tag[data-tag="harmony"] {
+    background: #FF851B;
+}
+
+.pin-tag[data-tag="melody"] {
+    background: #7FDBFF;
+}
+
+.pin-tag[data-tag="vibe"] {
+    background: #FFDC00;
+    color: black;
+}
+
+.pin-tag[data-tag="vocal chop"] {
+    background: #F012BE;
+}
+
+.pin-source {
+    color: #666;
+    font-size: 12px;
+    margin: -2px 0 8px 0;
 }
