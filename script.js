@@ -136,7 +136,7 @@ const handleUrl = url => {
     }
 };
 
-const savePin = (id, type, title, thumbnail, startTime, endTime, note) => {
+const savePin = (id, type, title, thumbnail, startTime, endTime, note, tag) => {
     const pins = JSON.parse(localStorage.getItem('soundPins') || '[]');
     pins.push({
         id: Date.now(),
@@ -146,7 +146,8 @@ const savePin = (id, type, title, thumbnail, startTime, endTime, note) => {
         thumbnail,
         startTime,
         endTime,
-        note
+        note,
+        tag
     });
     localStorage.setItem('soundPins', JSON.stringify(pins));
     displayPins();
@@ -156,8 +157,9 @@ const displayPins = () => {
     const pinsContainer = document.getElementById('pins-container');
     const pins = JSON.parse(localStorage.getItem('soundPins') || '[]');
 
-    pinsContainer.innerHTML = pins.map(({ mediaId, type, title, thumbnail, startTime, endTime, note }) => `
+    pinsContainer.innerHTML = pins.map(({ mediaId, type, title, thumbnail, startTime, endTime, note, tag }) => `
         <div class="pin-card">
+            ${tag ? `<div class="pin-tag" data-tag="${tag}">${tag}</div>` : ''}
             <img class="pin-thumbnail" src="${thumbnail}" alt="${title}">
             <div class="pin-content">
                 <div class="pin-title">${title}</div>
@@ -249,6 +251,9 @@ document.getElementById('save-pin').addEventListener('click', () => {
         return;
     }
 
+    const note = document.getElementById('pin-note').value;
+    const tag = document.getElementById('pin-tag').value.trim();
+
     const validateAndSave = (duration) => {
         if (endTime > duration) {
             alert(`End time cannot be greater than the media duration (${formatTime(duration)})`);
@@ -257,19 +262,17 @@ document.getElementById('save-pin').addEventListener('click', () => {
 
         if (currentVideoId) {
             const { title, thumbnail } = player.videoDetails;
-            savePin(currentVideoId, 'youtube', title, thumbnail, startTime, endTime, note);
+            savePin(currentVideoId, 'youtube', title, thumbnail, startTime, endTime, note, tag);
         } else {
             const { title, thumbnail } = soundcloudPlayer.videoDetails;
-            savePin(currentSoundCloudUrl, 'soundcloud', title, thumbnail, startTime, endTime, note);
+            savePin(currentSoundCloudUrl, 'soundcloud', title, thumbnail, startTime, endTime, note, tag);
         }
     };
-
-    const note = document.getElementById('pin-note').value;
 
     if (currentVideoId) {
         validateAndSave(player.getDuration());
     } else {
-        soundcloudPlayer.getDuration(duration => validateAndSave(duration / 1000)); // Convert ms to seconds
+        soundcloudPlayer.getDuration(duration => validateAndSave(duration / 1000));
     }
 });
 

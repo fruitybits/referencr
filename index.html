@@ -6,6 +6,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SoundPin</title>
     <link rel="stylesheet" href="style.css" />
+    <style>
+        .pin-tag {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .pin-tag[data-tag="drums"] {
+            background: #FF4136;
+        }
+
+        .pin-tag[data-tag="vocal"] {
+            background: #0074D9;
+        }
+
+        .pin-tag[data-tag="bass"] {
+            background: #B10DC9;
+        }
+
+        .pin-tag[data-tag="sound design"] {
+            background: #2ECC40;
+        }
+
+        .pin-tag[data-tag="harmony"] {
+            background: #FF851B;
+        }
+
+        .pin-tag[data-tag="melody"] {
+            background: #7FDBFF;
+        }
+
+        .pin-tag[data-tag="vibe"] {
+            background: #FFDC00;
+            color: black;
+        }
+
+        .pin-tag[data-tag="vocal chop"] {
+            background: #F012BE;
+        }
+
+        .pin-card {
+            position: relative;
+        }
+
+        #pin-tag {
+            margin-bottom: 10px;
+            padding: 8px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: white;
+        }
+    </style>
 </head>
 
 <body>
@@ -29,6 +86,17 @@
                     <input type="text" id="end-time" placeholder="0:00">
                 </div>
             </div>
+            <select id="pin-tag">
+                <option value="">Select a tag</option>
+                <option value="drums">Drums</option>
+                <option value="vocal">Vocal</option>
+                <option value="bass">Bass</option>
+                <option value="sound design">Sound Design</option>
+                <option value="harmony">Harmony</option>
+                <option value="melody">Melody</option>
+                <option value="vibe">Vibe</option>
+                <option value="vocal chop">Vocal Chop</option>
+            </select>
             <textarea id="pin-note" placeholder="Add a note..."></textarea>
             <button id="save-pin">Save</button>
         </div>
